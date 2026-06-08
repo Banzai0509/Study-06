@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>쇼핑 리스트</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 480px;
+      height: fit-content;
+      overflow: hidden;
+    }
+
+    header {
+      background: #4f46e5;
+      padding: 28px 24px 20px;
+      color: #fff;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stats {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 8px;
+      padding: 20px 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .input-area input {
+      flex: 1;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-area input:focus {
+      border-color: #4f46e5;
+    }
+
+    .input-area input::placeholder {
+      color: #b0b7c3;
+    }
+
+    .btn-add {
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background: #4338ca;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .filter-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active {
+      background: #eef2ff;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    .list {
+      list-style: none;
+      padding: 8px 0;
+      min-height: 60px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 48px 24px;
+      color: #b0b7c3;
+      font-size: 14px;
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      transition: background 0.1s;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .item:hover {
+      background: #fafafa;
+    }
+
+    .item.done .item-text {
+      text-decoration: line-through;
+      color: #b0b7c3;
+    }
+
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #d1d5db;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .item.done .checkbox {
+      background: #4f46e5;
+      border-color: #4f46e5;
+    }
+
+    .checkbox::after {
+      content: '';
+      display: none;
+      width: 6px;
+      height: 10px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    .item.done .checkbox::after {
+      display: block;
+    }
+
+    .item-text {
+      flex: 1;
+      font-size: 15px;
+      color: #1f2937;
+      word-break: break-all;
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #d1d5db;
+      font-size: 18px;
+      padding: 4px;
+      border-radius: 6px;
+      line-height: 1;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-delete:hover {
+      color: #ef4444;
+    }
+
+    footer {
+      padding: 14px 24px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-info {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      color: #ef4444;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-clear:hover {
+      background: #fef2f2;
+    }
+
+    .btn-clear:disabled {
+      color: #d1d5db;
+      cursor: default;
+    }
+
+    .btn-clear:disabled:hover {
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛒 쇼핑 리스트</h1>
+      <div class="stats" id="stats">항목 없음</div>
+    </header>
+
+    <div class="input-area">
+      <input
+        type="text"
+        id="input"
+        placeholder="아이템 추가..."
+        maxlength="80"
+        autocomplete="off"
+      >
+      <button class="btn-add" id="btn-add">추가</button>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="active">미완료</button>
+      <button class="filter-btn" data-filter="done">완료</button>
+    </div>
+
+    <ul class="list" id="list"></ul>
+
+    <footer>
+      <span class="footer-info" id="footer-info"></span>
+      <button class="btn-clear" id="btn-clear">완료 항목 삭제</button>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPABASE_URL = 'https://vytzfqzbhiwjupiezfjy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dHpmcXpiaGl3anVwaWV6Zmp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4ODA2NjksImV4cCI6MjA5NjQ1NjY2OX0.-5-Jj11FveMdCvnYLJp5RXF-83SxBc9hlC4H07ZRA8E';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let items = [];
+    let filter = 'all';
+
+    const listEl   = document.getElementById('list');
+    const inputEl  = document.getElementById('input');
+    const statsEl  = document.getElementById('stats');
+    const footerEl = document.getElementById('footer-info');
+    const clearBtn = document.getElementById('btn-clear');
+
+    async function loadItems() {
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .select('*')
+        .order('id', { ascending: false });
+      if (error) { console.error(error); return; }
+      items = data;
+      render();
+    }
+
+    function render() {
+      const filtered = items.filter(item => {
+        if (filter === 'active') return !item.done;
+        if (filter === 'done')   return item.done;
+        return true;
+      });
+
+      const total  = items.length;
+      const done   = items.filter(i => i.done).length;
+      const active = total - done;
+
+      statsEl.textContent = total === 0
+        ? '항목 없음'
+        : `총 ${total}개 · 완료 ${done}개 · 남은 ${active}개`;
+
+      footerEl.textContent = done > 0 ? `완료 ${done}개` : '';
+      clearBtn.disabled = done === 0;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <li class="empty">
+            <div class="empty-icon">${filter === 'done' ? '✅' : filter === 'active' ? '🎉' : '🛒'}</div>
+            <div>${
+              filter === 'done'   ? '완료된 항목이 없어요' :
+              filter === 'active' ? '모든 항목을 완료했어요!' :
+              '아이템을 추가해보세요'
+            }</div>
+          </li>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(item => `
+        <li class="item${item.done ? ' done' : ''}" data-id="${item.id}">
+          <div class="checkbox" data-action="toggle" data-id="${item.id}"></div>
+          <span class="item-text">${escapeHtml(item.text)}</span>
+          <button class="btn-delete" data-action="delete" data-id="${item.id}" title="삭제">✕</button>
+        </li>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    async function addItem() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      const id = Date.now();
+      inputEl.value = '';
+      const { error } = await supabase
+        .from('shopping_items')
+        .insert({ id, text, done: false });
+      if (error) { console.error(error); return; }
+      await loadItems();
+    }
+
+    async function toggleItem(id) {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      const { error } = await supabase
+        .from('shopping_items')
+        .update({ done: !item.done })
+        .eq('id', id);
+      if (error) { console.error(error); return; }
+      await loadItems();
+    }
+
+    async function deleteItem(id) {
+      const { error } = await supabase
+        .from('shopping_items')
+        .delete()
+        .eq('id', id);
+      if (error) { console.error(error); return; }
+      await loadItems();
+    }
+
+    async function clearDone() {
+      const { error } = await supabase
+        .from('shopping_items')
+        .delete()
+        .eq('done', true);
+      if (error) { console.error(error); return; }
+      await loadItems();
+    }
+
+    document.getElementById('btn-add').addEventListener('click', addItem);
+
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') addItem();
+    });
+
+    listEl.addEventListener('click', e => {
+      const action = e.target.closest('[data-action]');
+      if (!action) return;
+      const id = Number(action.dataset.id);
+      if (action.dataset.action === 'toggle') toggleItem(id);
+      if (action.dataset.action === 'delete') deleteItem(id);
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filter = btn.dataset.filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+      });
+    });
+
+    clearBtn.addEventListener('click', clearDone);
+
+    loadItems();
+  </script>
+</body>
+</html>
